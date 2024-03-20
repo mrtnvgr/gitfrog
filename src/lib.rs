@@ -24,6 +24,16 @@ impl Info {
 
         futures::future::join_all(tasks).await
     }
+
+    pub async fn from_urls_ref(urls: Vec<&Url>) -> Vec<Result<Self, Error>> {
+        let mut tasks = Vec::new();
+
+        for url in urls {
+            tasks.push(Self::from_url(url));
+        }
+
+        futures::future::join_all(tasks).await
+    }
 }
 
 #[derive(Debug, Eq, PartialEq)]
