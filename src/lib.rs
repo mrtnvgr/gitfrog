@@ -48,6 +48,15 @@ impl State {
     pub const fn is_open(&self) -> bool {
         matches!(self, Self::Open)
     }
+
+    pub const fn as_str(&self) -> &str {
+        match self {
+            Self::Open => "open",
+            Self::Closed => "closed",
+            Self::Merged => "merged",
+            Self::Draft => "draft",
+        }
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
