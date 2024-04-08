@@ -1,6 +1,8 @@
 use crate::{hosts::UA, Error, Host, Info, State};
-use reqwest::{header::USER_AGENT, Client};
+use reqwest::{header::USER_AGENT, Client, Response};
 use serde::Deserialize;
+use serde_json::Value;
+use std::collections::HashMap;
 use url::Url;
 use url_matcher::FromPattern;
 
@@ -11,7 +13,7 @@ struct PatternData {
 impl FromPattern<Self> for PatternData {}
 
 #[derive(Deserialize)]
-struct Response {
+struct ZillaResponse {
     bugs: Vec<Bug>,
 }
 
@@ -30,7 +32,11 @@ pub async fn get(host: &Host<'_>, domain: &str, url: &Url) -> Result<Vec<Info>, 
 
     let data = PatternData::from_pattern(host.pattern(), &data)?;
 
-    let url = format!("https://{domain}/rest/bug/{}", data.number);
+    let url = match host {
+        Host::Bugzilla(_) => get_rest_url(domain, &data),
+        Host::BugzillaJsonRpc(_) => get_jsonrpc_url(domain, &data)?,
+        _ => unreachable!(),
+    };
 
     let mut request = client.get(url);
     request = request.header(USER_AGENT, UA);
@@ -41,7 +47,12 @@ pub async fn get(host: &Host<'_>, domain: &str, url: &Url) -> Result<Vec<Info>, 
     // }
 
     let response = request.send().await?.error_for_status()?;
-    let resp: Response = response.json().await?;
+
+    let resp: ZillaResponse = match host {
+        Host::Bugzilla(_) => response.json().await?,
+        Host::BugzillaJsonRpc(_) => get_jsonrpc_resp(response).await?,
+        _ => unreachable!(),
+    };
 
     let mut infos = Vec::new();
 
@@ -59,4 +70,22 @@ pub async fn get(host: &Host<'_>, domain: &str, url: &Url) -> Result<Vec<Info>, 
     }
 
     Ok(infos)
+}
+
+async fn get_jsonrpc_resp(response: Response) -> Result<ZillaResponse, Error> {
+    let json: HashMap<String, Value> = response.json().await?;
+    let result = json.get("result").ok_or(Error::InvalidURL)?;
+    Ok(serde_json::from_value(result.clone())?)
+}
+
+fn get_rest_url(domain: &str, data: &PatternData) -> String {
+    format!("https://{domain}/rest/bug/{}", data.number)
+}
+
+fn get_jsonrpc_url(domain: &str, data: &PatternData) -> Result<String, Error> {
+    let base = format!("https://{domain}/jsonrpc.cgi");
+    let params = format!("[{{\"ids\": [{}]}}]", data.number);
+    let iter = vec![("method", "Bug.get"), ("params", &params)];
+    let url = Url::parse_with_params(&base, iter).map_err(|_| Error::InvalidURL)?;
+    Ok(url.to_string())
 }

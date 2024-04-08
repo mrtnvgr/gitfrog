@@ -93,11 +93,13 @@ async fn from_urls() {
 }
 
 #[tokio::test]
-async fn bugzilla() {
+async fn bugzilla_rpc() {
     let url = Url::parse("https://bugs.winehq.org/show_bug.cgi?id=54692").unwrap();
-    let domain = url.domain().unwrap();
-    let info = Host::Bugzilla(domain).get(&url).await.unwrap();
+    let info = Info::from_url(&url).await.unwrap();
 
-    assert_eq!(info.title, "Title");
+    assert_eq!(
+        info.title,
+        "Many DX11 applications crashes after applying wined3d-bindless-texture patch"
+    );
     assert_eq!(info.state, State::Open);
 }

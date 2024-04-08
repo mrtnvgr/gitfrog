@@ -62,7 +62,7 @@ impl State {
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum Error {
-    #[error("Could not parse given url")]
+    #[error("Could not use given url")]
     InvalidURL,
     #[error("Failed to auto-detect host: \"{0}\"")]
     UnknownHost(String),
@@ -74,6 +74,8 @@ pub enum Error {
     ReqwestError(#[from] reqwest::Error),
     #[error(transparent)]
     URLMatcherError(#[from] url_matcher::Error),
+    #[error(transparent)]
+    SerdeJsonError(#[from] serde_json::Error),
     #[error("This should't happen")]
     Unreachable,
 }
