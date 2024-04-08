@@ -3,7 +3,7 @@ mod hosts;
 pub use hosts::Host;
 use url::Url;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Info {
     pub title: String,
     pub state: State,
@@ -36,7 +36,7 @@ impl Info {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub enum State {
     Open,
     Closed,
@@ -60,6 +60,7 @@ impl State {
 }
 
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     #[error("Could not parse given url")]
     InvalidURL,
@@ -73,6 +74,8 @@ pub enum Error {
     ReqwestError(#[from] reqwest::Error),
     #[error(transparent)]
     URLMatcherError(#[from] url_matcher::Error),
+    #[error("This should't happen")]
+    Unreachable,
 }
 
 #[cfg(test)]

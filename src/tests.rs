@@ -52,8 +52,8 @@ async fn gitea() {
     let info = Info::from_url(&url).await.unwrap();
 
     assert_eq!(info.title, "Kitty keyboard protocol broken?");
-    assert_eq!(info.state, State::Open);
-    assert!(info.state.is_open());
+    assert_eq!(info.state, State::Closed);
+    assert!(!info.state.is_open());
 
     let url = Url::parse("https://codeberg.org/dnkl/foot/pulls/1640").unwrap();
     let info = Info::from_url(&url).await.unwrap();
@@ -90,4 +90,14 @@ async fn from_urls() {
     assert_eq!(info[0].as_ref().unwrap().title, "fix: typo");
     assert_eq!(info[1].as_ref().unwrap().title, "fix: #103");
     assert!(info[2].is_err());
+}
+
+#[tokio::test]
+async fn bugzilla() {
+    let url = Url::parse("https://bugs.winehq.org/show_bug.cgi?id=54692").unwrap();
+    let domain = url.domain().unwrap();
+    let info = Host::Bugzilla(domain).get(&url).await.unwrap();
+
+    assert_eq!(info.title, "Title");
+    assert_eq!(info.state, State::Open);
 }

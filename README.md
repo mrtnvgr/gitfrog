@@ -4,6 +4,11 @@
 
 Get current info about PRs and issues
 
+## Supported
+
+- Github, Gitlab, Gitea
+- Bugzilla
+
 ## Examples
 
 ### Auto-detection for well-known forges
