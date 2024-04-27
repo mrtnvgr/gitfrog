@@ -91,15 +91,3 @@ async fn from_urls() {
     assert_eq!(info[1].as_ref().unwrap().title, "fix: #103");
     assert!(info[2].is_err());
 }
-
-#[tokio::test]
-async fn bugzilla_rpc() {
-    let url = Url::parse("https://bugs.winehq.org/show_bug.cgi?id=54692").unwrap();
-    let info = Info::from_url(&url).await.unwrap();
-
-    assert_eq!(
-        info.title,
-        "Many DX11 applications crashes after applying wined3d-bindless-texture patch"
-    );
-    assert_eq!(info.state, State::Open);
-}

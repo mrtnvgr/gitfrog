@@ -11,7 +11,6 @@ const GITHUB_DOMAIN: &str = "github.com";
 const GITLAB_DOMAIN: &str = "gitlab.com";
 const CODEBERG_DOMAIN: &str = "codeberg.org";
 const FREEDESKTOP_DOMAIN: &str = "gitlab.freedesktop.org";
-const WINEHQ_DOMAIN: &str = "bugs.winehq.org";
 
 pub enum Host<'a> {
     Github,
@@ -42,7 +41,6 @@ impl<'a> Host<'a> {
             GITHUB_DOMAIN => Ok(Self::Github),
             CODEBERG_DOMAIN => Ok(Self::Gitea(domain)),
             GITLAB_DOMAIN | FREEDESKTOP_DOMAIN => Ok(Self::Gitlab(domain)),
-            WINEHQ_DOMAIN => Ok(Self::BugzillaJsonRpc(domain)),
             _ => Err(Error::UnknownHost(domain.to_owned())),
         }
     }
