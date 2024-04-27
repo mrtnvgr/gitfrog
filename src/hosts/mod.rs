@@ -25,6 +25,7 @@ pub enum Host<'a> {
 
 impl<'a> Host<'a> {
     pub async fn get(&self, url: &Url) -> Result<Info, Error> {
+        log::debug!("Getting {url}");
         match self {
             Self::Github | Self::Gitlab(_) | Self::Gitea(_) => git::get(self, url).await,
             // TODO: optimize for `from_urls`
