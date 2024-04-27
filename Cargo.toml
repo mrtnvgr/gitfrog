@@ -1,6 +1,6 @@
 [package]
 name = "gitfrog"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 description = "Get current info about PRs and issues"
 license = "GPL-3.0"
